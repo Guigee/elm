@@ -1,8 +1,9 @@
 <template>
+<div>
     <div class="shopcart">
         <div class="content">
             <div class="content-left">
-                <div class="logo-wrapper">
+                <div class="logo-wrapper" @click="toggleList">
                     <div class="logo" :class="{'heightlight':totalCount>0}">
                         <span class="icon-shopping_cart" :class="{'heightlight':totalCount>0}"></span>
                     </div>
@@ -11,7 +12,7 @@
                 <div class="price" :class="{'heightlight':totalPrice>0}">￥{{totalPrice}}</div>
                 <div class="desc">另需配送费￥{{deliveryPrice}}元</div>
             </div>
-            <div class="content-right">
+            <div class="content-right" @click="pay">
                 <div class="pay" :class="payClass">
                    {{payDesc}}
                 </div>
@@ -26,10 +27,39 @@
                 </transition>
             </div>
         </div>
+        <transition name="fold">
+        <div class="shopcart-list" v-show="listShow">
+            <div class="list-header">
+                <h1 class="title">购物车</h1>
+                <span class="empty" @click="empty">清空</span>
+            </div>
+            <div class="list-content" ref="listContent">
+                <ul>
+                    <li class="food" v-for="(food,index) in selectFood" :key="index">
+                        <span class="name">{{food.name}}</span>
+                        <div class="price">
+                            <span>￥{{food.price*food.count}}</span>
+                        </div>
+                        <div class="cartcontrol-wrapper" :food=food>
+                            <cartcontrol :food="food"></cartcontrol>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        </transition>
+        
+    </div>
+    <transition name='fade'>
+    <div class="listMark" v-show="listShow" @click="hiddenListMark"></div>
+    </transition>
     </div>
 </template>
 
 <script type="ecmascript-6">
+import BScroll from 'better-scroll'
+import cartcontrol from '../cartcontrol/cartcontrol.vue'
+
 export default {
     props: {
         selectFood:{
@@ -56,7 +86,8 @@ export default {
                 {show:false},
                 {show:false}
             ],
-            dropBalls: [] // 1.0
+            dropBalls: [],// 1.0
+            fold: true
         }
     },
     computed: {
@@ -90,6 +121,25 @@ export default {
             }else{
                 return 'noEnough'
             }
+        },
+        listShow() {
+            if(!this.totalCount){
+                this.fold = true
+                return false
+            }
+            let show = !this.fold
+            if(show){
+                this.$nextTick(function(){
+                    if(!this.scroll){
+                        this.scroll = new BScroll(this.$refs.listContent,{
+                            click: true
+                        })  
+                    } else{
+                        this.scroll.refresh()
+                    }
+                })
+            }
+            return show
         }
     },
     methods: {
@@ -139,7 +189,30 @@ export default {
                 ball.show = false;
                 el.style.display = 'none';
             }
+        },
+        toggleList() {
+            if(!this.totalCount){
+                return; 
+            }
+            this.fold = !this.fold
+        },
+        empty(){
+            this.selectFood.forEach(function(food){
+                food.count = 0
+            })
+        },
+        hiddenListMark(){
+            this.fold = true
+        },
+        pay(){
+            if(this.totalPrice<this.minPrice){
+                return
+            }
+            alert("支付"+this.totalPrice+"元")
         }
+    },
+    components: {
+        cartcontrol
     }
     
     // transitions: { // 1.0
@@ -204,6 +277,7 @@ export default {
     }
     .shopcart .content .content-left .logo-wrapper{
         position: relative;
+        z-index: 50;
         display: inline-block;
         top: -10px;
         margin: 0 12px;
@@ -320,5 +394,71 @@ export default {
                         border-radius: 50%
                         background: rgb(0,160,220)
                         transition: all 0.4s linear
+        .shopcart-list
+            position: absolute
+            left: 0
+            bottom: 48px
+            
+            z-index: 10
+            width: 100%
+            &.fold-enter-active,&.fold-leave-active
+                transition: all .5s
+                // transform: translate3d(0,-100%,0)
+           
+                // transform: translate3d(0,-100%,0)
+            &.fold-leave-to, &.fold-enter
+                transform: translate3d(0,100%,0)
+            .list-header
+                height: 40px
+                line-height: 40px
+                padding: 0 18px
+                background: #f3f5f7
+                border-bottom: 1px solid rgba(7,17,27,0.1)
+                .title
+                    float: left
+                    font-size: 14px
+                    color: rgb(7,17,27)
+                .empty
+                    float: right
+                    font-size: 12px;
+                    color: rgb(0,160,220)
+            .list-content
+                padding: 0 18px
+                max-height: 217px
+                overflow: hidden
+                background: #ffffff
+                .food
+                    position: relative
+                    padding: 12px 0
+                    box-sizing: border-box
+                    border: 0.5px solid rgba(7,17,27,0.1)
+                    list-style: none
+                    .name
+                        line-height: 24px
+                        font-size: 14px
+                        color: rgb(7,17,27)
+                    .price
+                        position: absolute 
+                        right: 90px
+                        bottom: 12px
+                        line-height: 24px
+                        font-size: 14px
+                        font-weight: 700
+                        color: rgb(240,20,20)
+                    .cartcontrol-wrapper
+                        position: absolute 
+                        right: 0
+                        bottom: 6px
+    .listMark
+        position: fixed
+        top: 0
+        left: 0
+        width: 100%
+        height: 100%
+        z-index: 40
+        -webkit-backdrop-filter: blur(10px)
+        transition: all 0.5s
+        //opacity: 1
+        background: rgba(7,17,27,0.6)
 </style>
 
