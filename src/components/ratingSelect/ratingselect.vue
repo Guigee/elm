@@ -1,11 +1,11 @@
 <template>
     <div class="ratingselect">
         <div class="rating-type">
-            <span @click="select(2,$event)" class="block positive" :class="{'active':selectType===2}">{{desc.all}}<span class="count">{{ratings.length}}</span></span>
-            <span @click="select(0,$event)" class="block positive" :class="{'active':selectType===0}">{{desc.positive}}<span class="count">{{positives.length}}</span></span>
-            <span @click="select(1,$event)" class="block negative" :class="{'active':selectType===1}">{{desc.negative}}<span class="count">{{negatives.lebgth}}</span></span>
+            <span @click="select(2,$event)" class="block positive" :class="{'active':type===2}">{{desc.all}}<span class="count">{{ratings.length}}</span></span>
+            <span @click="select(0,$event)" class="block positive" :class="{'active':type===0}">{{desc.positive}}<span class="count">{{positives.length}}</span></span>
+            <span @click="select(1,$event)" class="block negative" :class="{'active':type===1}">{{desc.negative}}<span class="count">{{negatives.lebgth}}</span></span>
         </div>
-        <div @click="toggleContent" class="switch" :class="{'on':onlyContent}">
+        <div @click="toggleContent" class="switch" :class="{'on':otype}">
             <span class="icon-check_circle"></span>
             <span class="text">只看内容的评价</span>
         </div>
@@ -44,6 +44,12 @@ export default {
             }   
         }
     },
+    data() {
+        return {
+            type: this.selectType,
+            otype: this.onlyContent
+        }
+    },
     computed: {
         positives(){
             return this.ratings.filter((rating) => {
@@ -61,15 +67,15 @@ export default {
             if(!event._constructed){
 				return
             } 
-            this.selectType = type
+            this.type = type
             this.$emit('ratingtypeselect',type)
         },
         toggleContent(event){
             if(!event._constructed){
 				return
             } 
-            this.onlyContent = !this.onlyContent
-            this.$emit('contenttoggle',this.onlyContent)
+            this.otype = !this.otype
+            this.$emit('contenttoggle',this.otype)
         }
     }
 }

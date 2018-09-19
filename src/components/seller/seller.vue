@@ -185,14 +185,15 @@ import split from '../split/split.vue'
 				width: 40px
 				right: 18px
 				top: 12px
-				text-align: left
+				text-align: center
 				.icon-favorite
 					display: block
 					background-image: url(favorite1.png)
-					width: 25px
+					width: 100%
 					height: 25px
 					background-size: 25px 25px
 					background-repeat: no-repeat
+					background-position: center
 					// color: #d4d6d9
 					// line-height: 24px
 					//font-size: 24px
